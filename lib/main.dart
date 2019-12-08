@@ -1,40 +1,133 @@
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(new MaterialApp(
-    title: "aplikasi gw",
-    home: new Hallo(),
-  ));
-}
+import 'package:hello_world/ApiService.dart';
 
-class Hallo extends StatelessWidget {
+import 'package:hello_world/profile.dart';
+
+
+
+void main() => runApp(MyApp());
+
+class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-        backgroundColor: Colors.yellow[200],
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
+       
         appBar: new AppBar(
           leading: new Icon(Icons.home),
           backgroundColor: Colors.red[800],
           title: new Center(
-            child: new Text("Kiu Beg"),
+            child: new Text("Fluter Lesson"),
           ),
-          actions: <Widget>[new Icon(Icons.search)],
+          actions: <Widget>[new Icon(Icons.add)],
         ),
-        body: new Container(
-          child: new Column(
-            children: <Widget>[
-              
-                new Row(
-                children: <Widget>[
-                  new Text("Deditian"),
-                  new Text("Mobile Programmer"),
-                
-                ],
-              ),
+        body: HomeScreen(),
+      ),
+    );
+  }
+}
 
-              new Icon(Icons.android,size: 70.0,),
-            ],
-          ),
-        ));
+class HomeScreen extends StatefulWidget {
+  @override
+  _BodyWidget createState() => _BodyWidget();
+
+}
+
+class _BodyWidget extends State<HomeScreen> {
+ApiService apiService;
+
+  @override
+  void initState() {
+    super.initState();
+    apiService = ApiService();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.topLeft,
+      child: SafeArea(
+        // left: true,
+        // top: true,
+        // right: true,
+        // bottom: true,
+        // minimum: const EdgeInsets.all(16.0),
+        
+        child: FutureBuilder(
+        future: apiService.getProfiles(),
+        builder: (BuildContext context, AsyncSnapshot<List<Profile>> snapshot) {
+          if (snapshot.hasError) {
+            return Center(
+              child: Text(
+                  "Something wrong with message: ${snapshot.error.toString()}"),
+            );
+          } else if (snapshot.connectionState == ConnectionState.done) {
+            List<Profile> profiles = snapshot.data;
+            return _buildListView(profiles);
+          } else {
+            return Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+        },
+      ),
+      ),
+    );
+  }
+
+ Widget _buildListView(List<Profile> profiles) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+      child: ListView.builder(
+        itemBuilder: (context, index) {
+          Profile profile = profiles[index];
+          return Padding(
+            padding: const EdgeInsets.only(top: 8.0),
+            child: Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      profile.name,
+                      style: Theme.of(context).textTheme.title,
+                    ),
+                    Text(profile.email),
+                    Text(profile.age.toString()),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: <Widget>[
+                        FlatButton(
+                          onPressed: () {
+                        
+                          },
+                          child: Text(
+                            "Delete",
+                            style: TextStyle(color: Colors.red),
+                          ),
+                        ),
+                        FlatButton(
+                          onPressed: () {
+                           
+                          },
+                          child: Text(
+                            "Edit",
+                            style: TextStyle(color: Colors.blue),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+        itemCount: profiles.length,
+      ),
+    );
   }
 }
