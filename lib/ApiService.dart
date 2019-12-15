@@ -15,4 +15,19 @@ class ApiService {
     }
   }
 
+  Future<bool> createProfile(Profile data) async {
+  final response = await client.post(
+    "$baseUrl/api/profile",
+    headers: {"content-type": "application/json"},
+    body: profileToJson(data),
+  );
+  if (response.statusCode == 201) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+  
+
 }
