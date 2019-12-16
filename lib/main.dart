@@ -27,14 +27,13 @@ class MyApp extends StatelessWidget {
           actions: <Widget>[
             new GestureDetector(
               onTap: () {
-                Navigator.push(_scaffoldState.currentContext, 
-                MaterialPageRoute(builder: (BuildContext context){
-                print("FormAddScreen button clicked");
-                return FormAddScreen();
-                }
-                 ),
+                Navigator.push(
+                  _scaffoldState.currentContext,
+                  MaterialPageRoute(builder: (BuildContext context) {
+                    print("FormAddScreen button clicked");
+                    return FormAddScreen();
+                  }),
                 );
-               
               },
               child: Padding(
                 padding: const EdgeInsets.only(right: 16.0),
@@ -58,6 +57,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _BodyWidget extends State<HomeScreen> {
+  BuildContext context;
   ApiService apiService;
 
   @override
@@ -68,15 +68,10 @@ class _BodyWidget extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    this.context = context;
     return Align(
       alignment: Alignment.topLeft,
       child: SafeArea(
-        // left: true,
-        // top: true,
-        // right: true,
-        // bottom: true,
-        // minimum: const EdgeInsets.all(16.0),
-
         child: FutureBuilder(
           future: apiService.getProfiles(),
           builder:
@@ -102,7 +97,7 @@ class _BodyWidget extends State<HomeScreen> {
 
   Widget _buildListView(List<Profile> profiles) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
       child: ListView.builder(
         itemBuilder: (context, index) {
           Profile profile = profiles[index];
@@ -123,18 +118,64 @@ class _BodyWidget extends State<HomeScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: <Widget>[
-                        FlatButton(
-                          onPressed: () {},
+                        RaisedButton(
+                          color: Colors.red[300],
+                          onPressed: () {
+                            showDialog(
+                                context: context,
+                                builder: (context) {
+                                  return AlertDialog(
+                                    title: Text("Warning"),
+                                    content: Text(
+                                        "Are you sure want to delete data profile ${profile.name}?"),
+                                    actions: <Widget>[
+                                      FlatButton(
+                                        child: Text("Yes"),
+                                        onPressed: () {
+                                          Navigator.pop(context);
+                                          apiService
+                                              .deleteProfile(profile.id)
+                                              .then((isSuccess) {
+                                            if (isSuccess) {
+                                              setState(() {});
+                                              Scaffold.of(this.context)
+                                                  .showSnackBar(SnackBar(
+                                                      content: Text(
+                                                          "Delete data success")));
+                                            }
+                                          });
+                                        },
+                                      ),
+                                      FlatButton(
+                                        child: Text("No"),
+                                        onPressed: () {
+                                          Navigator.pop(context);
+                                        },
+                                      )
+                                    ],
+                                  );
+                                });
+                          },
                           child: Text(
                             "Delete",
-                            style: TextStyle(color: Colors.red),
+                            style: TextStyle(color: Colors.white),
                           ),
                         ),
-                        FlatButton(
-                          onPressed: () {},
+                        RaisedButton(
+                          color: Colors.blue[300],
+                          onPressed: () {
+                            Navigator.push(
+                              _scaffoldState.currentContext,
+                              MaterialPageRoute(
+                                  builder: (BuildContext context) {
+                                print("FormAddScreen button clicked");
+                                return FormAddScreen(profile: profile);
+                              }),
+                            );
+                          },
                           child: Text(
                             "Edit",
-                            style: TextStyle(color: Colors.blue),
+                            style: TextStyle(color: Colors.white),
                           ),
                         ),
                       ],
